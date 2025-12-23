@@ -1,0 +1,2 @@
+dir: internal/db/migrations
+driver: postgres
