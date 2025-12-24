@@ -35,12 +35,16 @@ services:
 
   web:
     build: ./apps/web
+    command: npm run dev
     env_file:
       - .env
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     ports:
       - "3000:3000"
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
     depends_on:
       - api
 
