@@ -1,23 +1,21 @@
 package main
 
 import (
-	"net/http"
-
-	"omnicampus/api/internal/config"
+	"log"
 
 	"github.com/labstack/echo/v4"
+
+	"omnicampus/api/db"
+	"omnicampus/api/routes"
 )
 
 func main() {
-	cfg := config.Load()
+	db.Init()
+	defer db.Pool.Close()
 
 	e := echo.New()
 
-	e.GET("/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{
-			"status": "ok",
-		})
-	})
+	routes.RegisterRoutes(e)
 
-	e.Logger.Fatal(e.Start(":" + cfg.APIPort))
+	log.Fatal(e.Start(":8080"))
 }
