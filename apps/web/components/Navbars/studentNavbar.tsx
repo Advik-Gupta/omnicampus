@@ -10,9 +10,25 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 const StudentNavbar = () => {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    // clear auth tokens / cookies here
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
+
   return (
     <nav className="w-full border-b bg-background">
       <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
@@ -79,12 +95,28 @@ const StudentNavbar = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
-        <Link
-          href="/profile"
-          className="rounded-full border px-4 py-1.5 text-sm hover:bg-accent"
-        >
-          Profile
-        </Link>
+        {/* Avatar Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Avatar className="cursor-pointer h-9 w-9">
+              <AvatarImage src="https://i.pravatar.cc/150?img=12" />
+              <AvatarFallback>AG</AvatarFallback>
+            </Avatar>
+          </DropdownMenuTrigger>
+
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem asChild>
+              <Link href="/profile">Profile</Link>
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              className="text-red-600 focus:text-red-600"
+              onClick={handleLogout}
+            >
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </nav>
   );

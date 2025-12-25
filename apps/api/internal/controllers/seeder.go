@@ -5,9 +5,11 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 
-	"omnicampus/api/db"
+	"omnicampus/api/internal/db"
+	"omnicampus/api/internal/db/sqlc"
 )
 
 func SeedStudents(c echo.Context) error {
@@ -28,39 +30,36 @@ func SeedStudents(c echo.Context) error {
 	ctx := c.Request().Context()
 
 	for _, s := range students {
-		dob, err := time.Parse("2006-01-02", s.DOB)
+		// Parse DOB
+		dobTime, err := time.Parse("2006-01-02", s.DOB)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]string{
 				"error": "invalid DOB format",
 			})
 		}
 
-		_, err = db.Pool.Exec(
-			ctx,
-			`
-			INSERT INTO student (
-				id,
-				name,
-				register_number,
-				dob,
-				email,
-				password,
-				phone,
-				timetable_id,
-				courses_ids
-			)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, NULL, $8)
-			ON CONFLICT (email) DO NOTHING
-			`,
-			uuid.New(),        // Google UUID
-			s.Name,
-			s.RegNo,
-			dob,
-			s.Email,
-			"hashed_password", // dummy password
-			s.Phone,
-			[]uuid.UUID{},     // empty UUID array
-		)
+		// Convert UUID
+		id := pgtype.UUID{
+			Bytes: uuid.New(),
+			Valid: true,
+		}
+
+		// Convert DOB → pgtype.Date
+		dob := pgtype.Date{
+			Time:  dobTime,
+			Valid: true,
+		}
+
+		err = db.Queries.AddDummyStudent(ctx, sqlc.AddDummyStudentParams{
+			ID:             id,
+			Name:           s.Name,
+			RegisterNumber: s.RegNo,
+			Dob:            dob,
+			Email:          s.Email,
+			Password:       "hashed_password", // dummy
+			Phone:          s.Phone,
+			CoursesIds:     []pgtype.UUID{},
+		})
 
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{

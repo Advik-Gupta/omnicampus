@@ -2,18 +2,21 @@
 // versions:
 //   sqlc v1.30.0
 
-package db
+package sqlc
 
 import (
-	"database/sql"
-
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type User struct {
-	ID         uuid.UUID
-	Email      string
-	Role       string
-	IsVerified sql.NullBool
-	CreatedAt  sql.NullTime
+type Student struct {
+	ID             pgtype.UUID
+	Name           string
+	RegisterNumber string
+	Dob            pgtype.Date
+	Email          string
+	Password       string
+	Phone          string
+	TimetableID    pgtype.UUID
+	CoursesIds     []pgtype.UUID
+	CreatedAt      pgtype.Timestamp
 }

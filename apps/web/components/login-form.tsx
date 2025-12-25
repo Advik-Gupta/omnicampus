@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export function LoginForm({
   className,
@@ -18,7 +19,7 @@ export function LoginForm({
 }: React.ComponentProps<"form">) {
   const router = useRouter();
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const form = e.currentTarget;
@@ -26,12 +27,23 @@ export function LoginForm({
     const password = (form.elements.namedItem("password") as HTMLInputElement)
       .value;
 
+    // OTP login flow
     if (password === "") {
-      router.push(`/verify-otp`);
+      try {
+        await axios.post("http://localhost:8080/auth/request-otp", { email });
+
+        // store email for verify page
+        localStorage.setItem("otp_email", email);
+
+        router.push("/verify-otp");
+      } catch (err: any) {
+        alert(err.response?.data?.message || "Failed to send OTP");
+      }
       return;
     }
 
-    window.alert("Form submitted");
+    // normal password login (future)
+    alert("Password login not implemented yet");
   };
 
   return (

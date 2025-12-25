@@ -8,12 +8,12 @@ import (
 	"omnicampus/api/internal/controllers"
 )
 
-func RegisterDevRoutes(e *echo.Echo) {
+func devRoutes(api *echo.Group) {
 	if os.Getenv("ENV") != "dev" {
 		return
 	}
 
-	dev := e.Group("/dev")
+	dev := api.Group("/dev")
 
 	dev.GET("/seed", controllers.SeedStudents)
 }
