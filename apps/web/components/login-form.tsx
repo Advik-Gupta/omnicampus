@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import axios from "axios";
 
 export function LoginForm({
@@ -32,18 +33,51 @@ export function LoginForm({
       try {
         await axios.post("http://localhost:8080/auth/request-otp", { email });
 
-        // store email for verify page
         localStorage.setItem("otp_email", email);
-
         router.push("/verify-otp");
       } catch (err: any) {
-        alert(err.response?.data?.message || "Failed to send OTP");
+        const status = err.response?.status;
+        const message = err.response?.data?.error;
+
+        if (status === 400) {
+          // User already onboarded
+          toast.error(
+            "Account already onboarded. Please enter password to login."
+          );
+          return;
+        }
+
+        if (status === 401) {
+          toast.error("Unauthorized request. Please try again.");
+          return;
+        }
+
+        if (status === 500) {
+          toast.error("Server error. Please try again later.");
+          return;
+        }
+
+        toast.error(message || "Failed to send OTP");
       }
       return;
     }
 
-    // normal password login (future)
-    alert("Password login not implemented yet");
+    try {
+      const req = await axios.post("http://localhost:8080/auth/login", {
+        email,
+        password,
+      });
+
+      const token = req.data.token;
+
+      document.cookie = `auth_token=${token}; path=/; max-age=86400`;
+
+      toast.success("Login successful!");
+
+      router.push("/");
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || "Login failed");
+    }
   };
 
   return (

@@ -10,6 +10,7 @@ CREATE TABLE student (
   timetable_id UUID,
   courses_ids UUID[] NOT NULL DEFAULT '{}',
   created_at TIMESTAMP NOT NULL DEFAULT now(),
+  is_onboarded BOOLEAN NOT NULL DEFAULT false,
   PRIMARY KEY (id)
 );
 

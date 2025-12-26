@@ -19,4 +19,5 @@ type Student struct {
 	TimetableID    pgtype.UUID
 	CoursesIds     []pgtype.UUID
 	CreatedAt      pgtype.Timestamp
+	IsOnboarded    bool
 }

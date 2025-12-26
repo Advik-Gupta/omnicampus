@@ -8,9 +8,10 @@ INSERT INTO student (
     password,
     phone,
     timetable_id,
-    courses_ids
+    courses_ids,
+    is_onboarded
 )
 VALUES (
-    $1, $2, $3, $4, $5, $6, $7, NULL, $8
+    $1, $2, $3, $4, $5, $6, $7, NULL, $8, $9
 )
 ON CONFLICT (email) DO NOTHING;

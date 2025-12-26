@@ -23,6 +23,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import toast from "react-hot-toast";
 
 export function OTPForm(props: React.ComponentProps<typeof Card>) {
   const router = useRouter();
@@ -35,13 +36,13 @@ export function OTPForm(props: React.ComponentProps<typeof Card>) {
     const email = localStorage.getItem("otp_email");
 
     if (!email) {
-      alert("Session expired. Please login again.");
+      toast.error("Session expired. Please login again.");
       router.push("/login");
       return;
     }
 
     if (otp.length !== 6) {
-      alert("Please enter a valid 6-digit OTP");
+      toast.error("Please enter a valid 6-digit OTP");
       return;
     }
 
@@ -53,18 +54,17 @@ export function OTPForm(props: React.ComponentProps<typeof Card>) {
         otp,
       });
 
-      const token = res.data.token;
+      const verified = res.data.verified;
 
-      // Store JWT in cookie
-      document.cookie = `token=${token}; path=/; max-age=${
-        60 * 60 * 24 * 7
-      }; SameSite=Lax`;
-
-      localStorage.removeItem("otp_email");
-
-      router.push("/");
+      if (verified) {
+        toast.success("OTP verified successfully!");
+        router.push("/set-password");
+      } else {
+        toast.error("Invalid OTP. Please try again.");
+        router.push("/login");
+      }
     } catch (err: any) {
-      alert(err.response?.data?.message || "Invalid OTP");
+      toast.error(err.response?.data?.message || "Invalid OTP");
     } finally {
       setLoading(false);
     }

@@ -12,3 +12,18 @@ SELECT EXISTS (
 SELECT id
 FROM student
 WHERE email = $1;
+
+-- name: UpdateUserPasswordByID :exec
+UPDATE student
+SET password = $2
+WHERE id = $1;  
+
+-- name: GetStudentOnboardingStatusByEmail :one
+SELECT is_onboarded
+FROM student
+WHERE email = $1;
+
+-- name: SetStudentOnboardedByEmail :exec
+UPDATE student
+SET is_onboarded = TRUE
+WHERE email = $1;

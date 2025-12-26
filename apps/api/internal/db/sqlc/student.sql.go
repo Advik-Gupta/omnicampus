@@ -11,8 +11,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getStudentOnboardingStatusByEmail = `-- name: GetStudentOnboardingStatusByEmail :one
+SELECT is_onboarded
+FROM student
+WHERE email = $1
+`
+
+func (q *Queries) GetStudentOnboardingStatusByEmail(ctx context.Context, email string) (bool, error) {
+	row := q.db.QueryRow(ctx, getStudentOnboardingStatusByEmail, email)
+	var is_onboarded bool
+	err := row.Scan(&is_onboarded)
+	return is_onboarded, err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, register_number, dob, email, password, phone, timetable_id, courses_ids, created_at FROM student WHERE email = $1
+SELECT id, name, register_number, dob, email, password, phone, timetable_id, courses_ids, created_at, is_onboarded FROM student WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (Student, error) {
@@ -29,6 +42,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (Student, er
 		&i.TimetableID,
 		&i.CoursesIds,
 		&i.CreatedAt,
+		&i.IsOnboarded,
 	)
 	return i, err
 }
@@ -44,6 +58,33 @@ func (q *Queries) GetUserIDByEmail(ctx context.Context, email string) (pgtype.UU
 	var id pgtype.UUID
 	err := row.Scan(&id)
 	return id, err
+}
+
+const setStudentOnboardedByEmail = `-- name: SetStudentOnboardedByEmail :exec
+UPDATE student
+SET is_onboarded = TRUE
+WHERE email = $1
+`
+
+func (q *Queries) SetStudentOnboardedByEmail(ctx context.Context, email string) error {
+	_, err := q.db.Exec(ctx, setStudentOnboardedByEmail, email)
+	return err
+}
+
+const updateUserPasswordByID = `-- name: UpdateUserPasswordByID :exec
+UPDATE student
+SET password = $2
+WHERE id = $1
+`
+
+type UpdateUserPasswordByIDParams struct {
+	ID       pgtype.UUID
+	Password string
+}
+
+func (q *Queries) UpdateUserPasswordByID(ctx context.Context, arg UpdateUserPasswordByIDParams) error {
+	_, err := q.db.Exec(ctx, updateUserPasswordByID, arg.ID, arg.Password)
+	return err
 }
 
 const userExistsByEmail = `-- name: UserExistsByEmail :one

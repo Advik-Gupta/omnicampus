@@ -59,6 +59,7 @@ func SeedStudents(c echo.Context) error {
 			Password:       "hashed_password", // dummy
 			Phone:          s.Phone,
 			CoursesIds:     []pgtype.UUID{},
+			IsOnboarded:    false,
 		})
 
 		if err != nil {
