@@ -73,7 +73,11 @@ func SendOTP(email string) error {
 		return err
 	}
 
-	println("OTP:", otp)
+	err = utils.SendMail(email, otp)
+	if err != nil {
+		redis.Client.Del(redis.Ctx, key)
+		return err
+	}
 
 	return nil
 }
