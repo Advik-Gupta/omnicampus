@@ -33,7 +33,10 @@ export function LoginForm({
     // OTP login flow
     if (password === "") {
       try {
-        await axios.post("http://localhost:8080/auth/request-otp", { email });
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/request-otp`,
+          { email }
+        );
 
         localStorage.setItem("otp_email", email);
         router.push("/verify-otp");
@@ -68,20 +71,26 @@ export function LoginForm({
     }
 
     try {
-      const req = await axios.post("http://localhost:8080/auth/login", {
-        email,
-        password,
-      });
+      const req = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       const token = req.data.token;
 
       document.cookie = `auth_token=${token}; path=/; max-age=86400`;
 
-      const res = await axios.get("http://localhost:8080/auth/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = res.data;
 

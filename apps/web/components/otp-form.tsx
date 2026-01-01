@@ -49,10 +49,13 @@ export function OTPForm(props: React.ComponentProps<typeof Card>) {
     try {
       setLoading(true);
 
-      const res = await axios.post("http://localhost:8080/auth/verify-otp", {
-        email,
-        otp,
-      });
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/verify-otp`,
+        {
+          email,
+          otp,
+        }
+      );
 
       const verified = res.data.verified;
 

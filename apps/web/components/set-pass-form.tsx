@@ -62,7 +62,7 @@ export function SetPasswordForm({
     }
 
     axios
-      .post("http://localhost:8080/auth/set-password", {
+      .post(`${process.env.NEXT_PUBLIC_API_URL}/auth/set-password`, {
         email: userEmail,
         password,
       })
