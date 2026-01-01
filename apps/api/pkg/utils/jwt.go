@@ -21,3 +21,7 @@ func CreateJWT(userID string, email string) (string, error) {
 	signed, err := jwt.Sign(t, jwt.WithKey(jwa.HS256, jwtKey))
 	return string(signed), err
 }
+
+func JwtKey() []byte {
+	return jwtKey
+}

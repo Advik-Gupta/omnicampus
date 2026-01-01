@@ -7,6 +7,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/lestrrat-go/jwx/v2/jwa"
+	"github.com/lestrrat-go/jwx/v2/jwt"
+
 	"omnicampus/api/internal/db"
 	"omnicampus/api/internal/db/sqlc"
 	"omnicampus/api/pkg/redis"
@@ -152,3 +156,35 @@ func LoginUser(email, password string) (string, error) {
 
 	return utils.CreateJWT(user.ID.String(), email)
 }
+
+func Me(tokenStr string) (interface{}, error) {
+	parsed, err := jwt.Parse(
+		[]byte(tokenStr),
+		jwt.WithKey(jwa.HS256, utils.JwtKey()),
+		jwt.WithValidate(true),
+	)
+	if err != nil {
+		return nil, errors.New("invalid or expired token")
+	}
+
+	userID := parsed.Subject()
+	if userID == "" {
+		return nil, errors.New("invalid token payload")
+	}
+
+	var uid pgtype.UUID
+	if err := uid.Scan(userID); err != nil {
+		return nil, errors.New("invalid user id in token")
+	}
+
+	user, err := db.Queries.GetStudentByID(context.Background(), uid)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	user.Password = ""
+
+	return user, nil
+}
+
+

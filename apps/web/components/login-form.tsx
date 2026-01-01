@@ -12,13 +12,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import { useAuthStore } from "@/store/auth.store";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const router = useRouter();
+  const { setUser } = useAuthStore.getState();
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,12 +37,72 @@ export function LoginForm({
 
         localStorage.setItem("otp_email", email);
         router.push("/verify-otp");
-      } catch (err: any) {
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err)) {
+          const status = err.response?.status;
+          const message = err.response?.data?.error;
+
+          if (status === 400) {
+            toast.error(
+              "Account already onboarded. Please enter password to login."
+            );
+            return;
+          }
+
+          if (status === 401) {
+            toast.error("Unauthorized request. Please try again.");
+            return;
+          }
+
+          if (status === 500) {
+            toast.error("Server error. Please try again later.");
+            return;
+          }
+
+          toast.error(message || "Failed to send OTP");
+        } else {
+          toast.error("Something went wrong");
+        }
+      }
+      return;
+    }
+
+    try {
+      const req = await axios.post("http://localhost:8080/auth/login", {
+        email,
+        password,
+      });
+
+      const token = req.data.token;
+
+      document.cookie = `auth_token=${token}; path=/; max-age=86400`;
+
+      const res = await axios.get("http://localhost:8080/auth/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = res.data;
+
+      setUser({
+        id: data.ID,
+        name: data.Name,
+        email: data.Email,
+        register_number: data.RegisterNumber,
+        date_of_birth: data.DOB,
+        phone: data.Phone,
+      });
+
+      toast.success("Login successful!");
+
+      router.push("/");
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
         const status = err.response?.status;
         const message = err.response?.data?.error;
 
         if (status === 400) {
-          // User already onboarded
           toast.error(
             "Account already onboarded. Please enter password to login."
           );
@@ -58,25 +120,9 @@ export function LoginForm({
         }
 
         toast.error(message || "Failed to send OTP");
+      } else {
+        toast.error("Something went wrong");
       }
-      return;
-    }
-
-    try {
-      const req = await axios.post("http://localhost:8080/auth/login", {
-        email,
-        password,
-      });
-
-      const token = req.data.token;
-
-      document.cookie = `auth_token=${token}; path=/; max-age=86400`;
-
-      toast.success("Login successful!");
-
-      router.push("/");
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Login failed");
     }
   };
 

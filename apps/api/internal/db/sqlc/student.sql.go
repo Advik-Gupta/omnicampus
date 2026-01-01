@@ -11,6 +11,31 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getStudentByID = `-- name: GetStudentByID :one
+SELECT id, name, register_number, dob, email, password, phone, timetable_id, courses_ids, created_at, is_onboarded
+FROM student
+WHERE id = $1
+`
+
+func (q *Queries) GetStudentByID(ctx context.Context, id pgtype.UUID) (Student, error) {
+	row := q.db.QueryRow(ctx, getStudentByID, id)
+	var i Student
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.RegisterNumber,
+		&i.Dob,
+		&i.Email,
+		&i.Password,
+		&i.Phone,
+		&i.TimetableID,
+		&i.CoursesIds,
+		&i.CreatedAt,
+		&i.IsOnboarded,
+	)
+	return i, err
+}
+
 const getStudentOnboardingStatusByEmail = `-- name: GetStudentOnboardingStatusByEmail :one
 SELECT is_onboarded
 FROM student

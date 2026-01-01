@@ -19,13 +19,20 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
+import { useEffect } from "react";
 
 const StudentNavbar = () => {
   const router = useRouter();
+  const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    console.log("User data in Navbar:", user);
+  }, [user]);
 
   const handleLogout = () => {
-    // clear auth tokens / cookies here
-    localStorage.removeItem("token");
+    localStorage.removeItem("omnicampus-auth");
+    cookieStore.delete("auth_token");
     router.push("/login");
   };
 
@@ -95,26 +102,51 @@ const StudentNavbar = () => {
           </NavigationMenuList>
         </NavigationMenu>
 
-        {/* Avatar Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className="cursor-pointer h-9 w-9">
               <AvatarImage src="https://i.pravatar.cc/150?img=12" />
-              <AvatarFallback>AG</AvatarFallback>
+              <AvatarFallback>
+                {user?.name
+                  ?.split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
+              </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="w-40">
-            <DropdownMenuItem asChild>
-              <Link href="/profile">Profile</Link>
-            </DropdownMenuItem>
+          <DropdownMenuContent
+            align="end"
+            className="w-56 rounded-xl p-0 overflow-hidden"
+          >
+            <div className="px-4 py-3 border-b bg-muted/40">
+              <p className="text-sm font-semibold leading-tight">
+                {user?.name}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Reg No: {user?.register_number}
+              </p>
+            </div>
 
-            <DropdownMenuItem
-              className="text-red-600 focus:text-red-600"
-              onClick={handleLogout}
-            >
-              Logout
-            </DropdownMenuItem>
+            <div className="p-1">
+              <DropdownMenuItem asChild>
+                <Link
+                  href="/profile"
+                  className="flex items-center gap-2 px-3 py-2 rounded-md"
+                >
+                  Profile
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-red-600 focus:text-red-600"
+                onClick={handleLogout}
+              >
+                Logout
+              </DropdownMenuItem>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

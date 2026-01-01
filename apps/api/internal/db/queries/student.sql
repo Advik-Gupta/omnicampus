@@ -27,3 +27,8 @@ WHERE email = $1;
 UPDATE student
 SET is_onboarded = TRUE
 WHERE email = $1;
+
+-- name: GetStudentByID :one
+SELECT *
+FROM student
+WHERE id = $1;

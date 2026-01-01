@@ -12,4 +12,5 @@ func authRoutes(api *echo.Group) {
 	auth.POST("/verify-otp", handlers.VerifyOTP)
 	auth.POST("/set-password", handlers.SetPassword)
 	auth.POST("/login", handlers.LoginUser)
+	auth.GET("/me", handlers.MeHandler)
 }

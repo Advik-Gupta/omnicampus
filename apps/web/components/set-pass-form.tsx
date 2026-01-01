@@ -61,7 +61,6 @@ export function SetPasswordForm({
       router.push("/login");
     }
 
-    // Proceed with form submission (e.g., API call)
     axios
       .post("http://localhost:8080/auth/set-password", {
         email: userEmail,
@@ -75,7 +74,6 @@ export function SetPasswordForm({
       })
       .catch((error) => {
         toast.error("An error occurred while setting the password.");
-        // Handle error response
       });
   };
 

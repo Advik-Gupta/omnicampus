@@ -1,6 +1,6 @@
 "use client";
 
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -63,10 +63,12 @@ export function OTPForm(props: React.ComponentProps<typeof Card>) {
         toast.error("Invalid OTP. Please try again.");
         router.push("/login");
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Invalid OTP");
-    } finally {
-      setLoading(false);
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || "Invalid OTP");
+      } else {
+        toast.error("Invalid OTP");
+      }
     }
   };
 
