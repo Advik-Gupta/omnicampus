@@ -5,7 +5,8 @@
 
 ## 🌐 Demo
 
-Coming soon
+Frontend = Coming soon
+Backend = https://humorous-curiosity-production-0e89.up.railway.app/health
 
 ## ⚙️ Tech Stack:
 
