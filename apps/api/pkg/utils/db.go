@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"omnicampus/api/internal/config"
 	"omnicampus/api/internal/db"
 	"omnicampus/api/internal/db/sqlc"
 
@@ -11,18 +12,9 @@ import (
 )
 
 func InitDB() {
-	cfg := Config
+	cfg := config.Load()
 
-	dsn := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		cfg.PostgresUser,
-		cfg.PostgresPassword,
-		cfg.PostgresHost,
-		cfg.PostgresPort,
-		cfg.PostgresDB,
-	)
-
-	pool, err := pgxpool.New(context.Background(), dsn)
+	pool, err := pgxpool.New(context.Background(), cfg.DatabaseURL)
 	if err != nil {
 		panic(err)
 	}

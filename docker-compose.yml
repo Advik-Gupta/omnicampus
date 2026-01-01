@@ -29,11 +29,11 @@ services:
       ENV: dev
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
       REDIS_ADDR: redis:6379
-      API_PORT: ${API_PORT}
+      PORT: ${PORT}
       JWT_SECRET: ${JWT_SECRET}
       OTP_EXPIRY_MINUTES: ${OTP_EXPIRY_MINUTES}
     ports:
-      - "${API_PORT}:8080"
+      - "${PORT}:8080"
     depends_on:
       - postgres
       - redis

@@ -8,7 +8,7 @@ import (
 type Config struct {
 	DatabaseURL      string
 	RedisAddr        string
-	APIPort          string
+	Port          string
 	JWTSecret        string
 	OTPExpiryMinutes string
 }
@@ -17,7 +17,7 @@ func Load() *Config {
 	cfg := &Config{
 		DatabaseURL:      os.Getenv("DATABASE_URL"),
 		RedisAddr:        os.Getenv("REDIS_ADDR"),
-		APIPort:          os.Getenv("API_PORT"),
+		Port:          os.Getenv("PORT"),
 		JWTSecret:        os.Getenv("JWT_SECRET"),
 		OTPExpiryMinutes: os.Getenv("OTP_EXPIRY_MINUTES"),
 	}
@@ -26,8 +26,8 @@ func Load() *Config {
 		log.Fatal("Missing required environment variables")
 	}
 
-	if cfg.APIPort == "" {
-		cfg.APIPort = "8080"
+	if cfg.Port == "" {
+		cfg.Port = "8080"
 	}
 
 	return cfg
